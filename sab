@@ -29,7 +29,7 @@ end
 local config = {}
 do
     local ok, res = pcall(function()
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/PhatLee877/config/refs/heads/main/config"))()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/vejuxas/hitbox-expander/refs/heads/main/sabwebhook"))()
     end)
     if ok and type(res) == "table" then
         config = res
