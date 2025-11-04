@@ -4117,19 +4117,25 @@ function Compkiller:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal)
 			Property = 'TextColor3'
 		});
 
-		Compkiller:_Hover(Frame,function()
-			if Signal:GetValue() then
-				Compkiller:_Animation(Frame,TweenInfo.new(0.2),{
-					BackgroundTransparency = 0
-				})
-			end;
-		end,function()
-			if Signal:GetValue() then
-				Compkiller:_Animation(Frame,TweenInfo.new(0.2),{
-					BackgroundTransparency = 0.1
-				})
-			end;
-		end);
+	Compkiller:_Hover(Frame,function()
+		if Signal:GetValue() then
+			Compkiller:_Animation(Frame,TweenInfo.new(0.2),{
+				BackgroundTransparency = 0
+			})
+			Compkiller:_Animation(UIStroke,TweenInfo.new(0.2),{
+				Transparency = 0
+			})
+		end;
+	end,function()
+		if Signal:GetValue() then
+			Compkiller:_Animation(Frame,TweenInfo.new(0.2),{
+				BackgroundTransparency = 0.1
+			})
+			Compkiller:_Animation(UIStroke,TweenInfo.new(0.2),{
+				Transparency = 0.5
+			})
+		end;
+	end);
 
 	Compkiller:_Input(Frame,function()
 		-- Click animation: scale down then back up
